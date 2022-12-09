@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_app/quiz_brain.dart';
+
+QuizBrain quizBrain = QuizBrain();
 
 void main() => runApp(const QuizApp());
 
@@ -10,9 +13,9 @@ class QuizApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         backgroundColor: Colors.grey.shade900,
-        body: SafeArea(
+        body: const SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            padding: EdgeInsets.symmetric(horizontal: 10.0),
             child: QuizPage(),
           ),
         ),
@@ -22,19 +25,80 @@ class QuizApp extends StatelessWidget {
 }
 
 class QuizPage extends StatefulWidget {
+  const QuizPage({super.key});
+
   @override
   _QuizPageState createState() => _QuizPageState();
 }
 
 class _QuizPageState extends State<QuizPage> {
-  List<Icon> scoreKeeper = [];
-  List<String> questions = [
-    'You can lead a cow down stairs but not up stairs.',
-    'Approximately one quarter of human bones are in the feet.',
-    'A slug\'s blood is green.'
-  ];
+  List<Widget> scoreKeeper = [];
+  int score = 0;
 
-  int questionNo = 0;
+  void checkAnswer(bool userPickedAnswer) {
+    bool coreectAnswer = quizBrain.getQuestionAnswer();
+
+    setState(() {
+      if (quizBrain.isFinished() == true) {
+        showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Quiz Finished"),
+                content: Text("Your score is $score"),
+                actions: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                        child: const Text("Exit"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            quizBrain.reset();
+
+                            scoreKeeper = [];
+                            score = 0;
+                            Navigator.of(context).pop();
+                          });
+                        },
+                        child: const Text("Play again"),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            });
+      } else {
+        if (userPickedAnswer == coreectAnswer) {
+          scoreKeeper.add(
+            const Icon(
+              Icons.check,
+              color: Colors.green,
+            ),
+          );
+          score++;
+        } else {
+          scoreKeeper.add(
+            const Icon(
+              Icons.close,
+              color: Colors.red,
+            ),
+          );
+        }
+      }
+
+      quizBrain.nextQuestion();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -47,7 +111,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: const EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questions[questionNo],
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 25.0,
@@ -71,13 +135,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                setState(() {
-                  scoreKeeper.add(const Icon(
-                    Icons.check,
-                    color: Colors.green,
-                  ));
-                  questionNo++;
-                });
+                checkAnswer(true);
               },
             ),
           ),
@@ -96,13 +154,20 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                //The user picked false.
+                checkAnswer(false);
               },
             ),
           ),
         ),
-        Row(
-          children: scoreKeeper,
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              textDirection: TextDirection.rtl,
+              children: scoreKeeper,
+            ),
+          ),
         )
       ],
     );
