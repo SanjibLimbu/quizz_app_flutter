@@ -35,8 +35,8 @@ class _QuizPageState extends State<QuizPage> {
   List<Widget> scoreKeeper = [];
   int score = 0;
 
-  void checkAnswer(bool userPickedAnswer) {
-    bool coreectAnswer = quizBrain.getQuestionAnswer();
+  void checkAnswer(String userPickedAnswer) {
+    String coreectAnswer = quizBrain.getQuestionAnswer().toString();
 
     setState(() {
       if (quizBrain.isFinished() == true) {
@@ -76,23 +76,23 @@ class _QuizPageState extends State<QuizPage> {
                 ],
               );
             });
+      }
+      // ignore: unrelated_type_equality_checks
+      if (userPickedAnswer == coreectAnswer) {
+        scoreKeeper.add(
+          const Icon(
+            Icons.check,
+            color: Colors.green,
+          ),
+        );
+        score++;
       } else {
-        if (userPickedAnswer == coreectAnswer) {
-          scoreKeeper.add(
-            const Icon(
-              Icons.check,
-              color: Colors.green,
-            ),
-          );
-          score++;
-        } else {
-          scoreKeeper.add(
-            const Icon(
-              Icons.close,
-              color: Colors.red,
-            ),
-          );
-        }
+        scoreKeeper.add(
+          const Icon(
+            Icons.close,
+            color: Colors.red,
+          ),
+        );
       }
 
       quizBrain.nextQuestion();
@@ -126,16 +126,18 @@ class _QuizPageState extends State<QuizPage> {
             padding: const EdgeInsets.all(15.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, foregroundColor: Colors.white),
-              child: const Text(
-                'True',
-                style: TextStyle(
-                  color: Colors.white,
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+              ),
+              child: Text(
+                quizBrain.getOptions()["option_one"],
+                style: const TextStyle(
+                  color: Colors.black,
                   fontSize: 20.0,
                 ),
               ),
               onPressed: () {
-                checkAnswer(true);
+                checkAnswer(quizBrain.getOptions()["option_one"]);
               },
             ),
           ),
@@ -145,16 +147,39 @@ class _QuizPageState extends State<QuizPage> {
             padding: const EdgeInsets.all(15.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, foregroundColor: Colors.white),
-              child: const Text(
-                'False',
-                style: TextStyle(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+              ),
+              child: Text(
+                quizBrain.getOptions()["option_two"],
+                style: const TextStyle(
                   fontSize: 20.0,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
               onPressed: () {
-                checkAnswer(false);
+                checkAnswer(quizBrain.getOptions()["option_two"]);
+              },
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+              ),
+              child: Text(
+                quizBrain.getOptions()["option_three"],
+                style: const TextStyle(
+                  fontSize: 20.0,
+                  color: Colors.black,
+                ),
+              ),
+              onPressed: () {
+                checkAnswer(quizBrain.getOptions()["option_three"]);
               },
             ),
           ),
@@ -173,9 +198,3 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 }
-
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
